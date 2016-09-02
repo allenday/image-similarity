@@ -25,7 +25,7 @@ public class RankerTest {
 			System.err.println(m.score + "\t" + m.id);
 		}
 		
-		fail("Not yet implemented");
+		//fail("Not yet implemented");
 	}
 
 }
