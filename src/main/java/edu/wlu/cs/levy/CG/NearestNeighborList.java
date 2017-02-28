@@ -1,6 +1,5 @@
 package edu.wlu.cs.levy.CG;
 
-import java.util.*;
 
 // Bjoern Heckel's solution to the KD-Tree n-nearest-neighbor problem
 
@@ -31,7 +30,8 @@ class NearestNeighborList<T> {
         m_Queue = new java.util.PriorityQueue<NeighborEntry<T>>(m_Capacity);
     }
 
-    public double getMaxPriority() {
+    @SuppressWarnings("rawtypes")
+	public double getMaxPriority() {
         NeighborEntry p = m_Queue.peek();
         return (p == null) ? Double.POSITIVE_INFINITY : p.value ;
     }
