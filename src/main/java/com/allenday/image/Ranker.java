@@ -1,6 +1,7 @@
 package com.allenday.image;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -123,6 +124,7 @@ public class Ranker {
 		return tHistogram.get(feature).get(key);
 	}
 
+	@SuppressWarnings("unused")
 	private String getPointString(Integer feature, String key) {
 		String result = "";
 		double[] point = getPoint(feature, key);
@@ -178,7 +180,7 @@ public class Ranker {
 		histogram.get(feature).put(key, x);
 	}
 
-	public Ranker(List<ImageFeatures> images) throws KeySizeException, KeyDuplicateException {
+	public Ranker(Collection<ImageFeatures> images) throws KeySizeException, KeyDuplicateException {
 		for (int i = 0; i < 5; i++) {		
 			histogram.add(new HashMap<String,double[]>());
 			kdtree.add(new KDTree<String>(8));
@@ -202,6 +204,7 @@ public class Ranker {
 	}
 	
 	
+	@SuppressWarnings("unused")
 	public List<SearchResult> rank(ImageFeatures query) throws KeySizeException, IllegalArgumentException {
 		List<SearchResult> results = new ArrayList<SearchResult>();
 		
