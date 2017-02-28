@@ -10,7 +10,7 @@ public class ImageProcessorTest {
 	
 	@Test
 	public void test() {
-		processor.setFiles(new File("src/test/resources/image"));
-		List<ImageFeatures> r = processor.processImages();
+		processor.addFile(new File("src/test/resources/image"));
+		processor.processImages();
 	}
 }
