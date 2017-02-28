@@ -1,9 +1,8 @@
 package com.allenday.image;
 
-import static org.junit.Assert.*;
-
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -16,10 +15,11 @@ public class RankerTest {
 	
 	@Test
 	public void test() throws KeySizeException, KeyDuplicateException {
-		processor.setFiles(new File("src/test/resources/image"));
-		List<ImageFeatures> images = processor.processImages();
-		Ranker ranker = new Ranker(images);
-		List<SearchResult> match = ranker.rank(images.get(1));
+		processor.addFile(new File("src/test/resources/image"));
+		processor.processImages();
+		Map<File,ImageFeatures> res = processor.getResults();
+		Ranker ranker = new Ranker(res.values());
+		List<SearchResult> match = ranker.rank(res.values().iterator().next());
 		
 		for (SearchResult m : match) {
 			System.err.println(m.score + "\t" + m.id);
