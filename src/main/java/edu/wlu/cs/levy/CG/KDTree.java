@@ -364,7 +364,8 @@ public class KDTree<T> {
 	
 	for (int i=0; i<n; ++i) {
 	    KDNode<T> kd = nnl.removeHighest();
-	    HPoint p = kd.k;
+	    @SuppressWarnings("unused")
+		HPoint p = kd.k;
 	    if (metric.distance(kd.k.coord, key) < dist) {
 		nbrs.push(kd.v);
 	    }
