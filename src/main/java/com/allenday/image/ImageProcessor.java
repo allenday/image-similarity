@@ -2,8 +2,10 @@ package com.allenday.image;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.allenday.image.backend.Processor;
 
@@ -18,18 +20,42 @@ public class ImageProcessor {
 	public static final int C = 4;
 	public static final int M = 5;
 	
-	List<File> files = new ArrayList<File>();
+	private int bins = 0;
+	private int bits = 0;
+	private boolean normalize = false;
+	
+	
+	Map<File, ImageFeatures> files = new HashMap<File,ImageFeatures>();
 	Processor processor;
 	
 	//static KDTree[] kdtree = {new KDTree<String>(8), new KDTree<String>(8), new KDTree<String>(8)}; 
 
-	public void setFiles(File directory) {
-		files.clear();
-		recurse(directory);
+	public ImageProcessor() {
+		this(8, 8, false);
 	}
 	
-	public void addFiles(File directory) {
-		recurse(directory);
+	public ImageProcessor(int bins, int bits, boolean normalize) {
+		this.bins = bins;
+		this.bits = bits;
+		this.normalize = normalize;
+	}
+	
+	public void setFiles(List<File> files) {
+		files.clear();
+		addFiles( files );
+	}
+
+	public void addFile(File file) {
+		if ( file.isDirectory() )
+			recurse(file);
+		else if ( ! files.containsKey(file) )
+			files.put(file,null);
+	}
+	
+	public void addFiles(List<File> files) {
+		for (File file : files) {
+			addFile(file);
+		}
 	}
 	
 	public void recurse(File directory) {
@@ -46,24 +72,40 @@ public class ImageProcessor {
 				else {
 					File ff = new File(directory+"/"+f);
 					//System.err.println("add file1="+ff);
-					files.add(ff);
+					if ( ! files.containsKey(ff) )
+						files.put(ff,null);
 				}
 			}
 		}
-		else {
+		else if ( ! files.containsKey(directory) ) {
 			//System.err.println("add file2="+directory);
-			files.add(directory);
+			files.put(directory,null);
 		}
 	}
 	
-	public List<ImageFeatures> processImages() {
-		List<ImageFeatures> results = new ArrayList<ImageFeatures>();
-		for (File f : files) {
+	public Map<File,ImageFeatures> getResults() {
+		Map<File,ImageFeatures> res = new HashMap<File,ImageFeatures>();
+		for (Entry<File,ImageFeatures> e : files.entrySet()) {
+			if (e.getValue() != null)
+				res.put(e.getKey(), e.getValue());
+		}
+		return res;
+	}
+	
+	public void processImages() {		
+		for (File f : files.keySet()) {
+			
+			//disallow non jpg
 			if ( f.toString().indexOf("jpg") == -1 && f.toString().indexOf("jpeg") == -1)
 				continue;
 
+			//skip already processed
+			if ( files.get(f) != null )
+				continue;
+			
 			try {
-				processor = new Processor(f, false);
+				processor = new Processor(f, bins, bits, normalize);
+				
 				double[] r = processor.getRedHistogram();
 				double[] g = processor.getGreenHistogram();
 				double[] b = processor.getBlueHistogram();
@@ -75,15 +117,16 @@ public class ImageProcessor {
 				for (int z = 0; z < m.length; z++)
 					mm[z] = m[z];
 				
-				ImageFeatures ff = new ImageFeatures(f.toString());
-				ff.setR(r);
-				ff.setG(g);
-				ff.setB(b);
-				ff.setT(t);
-				ff.setC(c);
-				ff.setM(mm);
+				ImageFeatures features = new ImageFeatures(f.toString(), bins);
+				features.setR(r);
+				features.setG(g);
+				features.setB(b);
+				features.setT(t);
+				features.setC(c);
+				features.setM(mm);
 				
-				results.add(ff);
+				files.put(f, features);
+				
 			} catch (KeySizeException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -95,7 +138,6 @@ public class ImageProcessor {
 				e.printStackTrace();
 			}
 		}
-		return results;
 	}
 		
 	/*
