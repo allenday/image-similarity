@@ -31,73 +31,57 @@ public class Processor {
 	public static final int C = 4;
 	private float lowBand = 1.0f;
 	private float highBand = 3.0f;
-	private double[] texture   = new double[8];
-	private double[] curviness = new double[8];
+	private double[] texture;
+	private double[] curviness;
 	private boolean hasEdgeHistograms = false;
 	private BufferedImage bufferedImage;
 	private SampleModel sampleModel;
 	private Histogram histogram;
 	private PlanarImage image;
-	private File file;
 	private int bandGlobalMax = 1;
 	private boolean normalize;
+	private int bins = 0;
+	private int bitsPerBin = 0;
+
+	public Processor(File file, int bins, int bitsPerBin, boolean normalize) throws IOException, KeySizeException, KeyDuplicateException {
+		this.bins = bins;
+		this.bitsPerBin = bitsPerBin;
+		this.normalize = normalize;
+		
+		texture = new double[bins];
+		curviness = new double[bins];
+		
+		logger.debug("file="+file);
+		System.err.println(file);
+		bufferedImage = ImageIO.read(file);
+		if (bufferedImage == null)
+			throw new IOException("cannot read file");
+		image = PlanarImage.wrapRenderedImage(bufferedImage);
+		sampleModel = image.getSampleModel();
+		int bandCount = sampleModel.getNumBands();
+		int bits = DataBuffer.getDataTypeSize(sampleModel.getDataType());
+		int[] binz = new int[bandCount];
+		double[] min = new double[bandCount];
+		double[] max = new double[bandCount];
+		int maxxx = 1 << bits;
+
+		for (int i = 0; i < bandCount; i++) {
+			//bins[i] = maxxx;
+			binz[i] = bins;
+			min[i]  = 0;
+			max[i]  = maxxx;
+		}
+		RenderedOp op = HistogramDescriptor.create(image, null, 1, 1, binz, min, max, null);
+		histogram = (Histogram)op.getProperty("histogram");
+		makeEdgeHistograms();
+
+		buildIndexes();
+	}
 	
-	public double[] getTextureHistogram() {
-		return texture;
-	}
-	public double[] getCurvatureHistogram() {
-		return curviness;
-	}
-	public double[] getRedHistogram() {
-		try {
-			return getBandHistogram(histogram, R, 8, normalize);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
-	public double[] getGreenHistogram() {
-		try {
-			return getBandHistogram(histogram, G, 8, normalize);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
-	public double[] getBlueHistogram() {
-		try {
-			return getBandHistogram(histogram, B, 8, normalize);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+	public Processor(File file, boolean normalize) throws IOException, KeySizeException, KeyDuplicateException {
+		this(file, 8, 8, normalize);
 	}
 
-	public Float getLowBand() {
-		return lowBand;
-	}
-	public Float getHighBand() {
-		return highBand;
-	}
-
-	public Integer getNumBands() {
-		return sampleModel.getNumBands();
-	}
-
-	public BufferedImage getEdgesImage() {
-		CannyEdgeDetector detector = new CannyEdgeDetector();
-		detector.setSourceImage(bufferedImage);
-		detector.setLowThreshold(lowBand); //1.0f
-		detector.setHighThreshold(highBand); //3.0f
-		detector.process();
-		BufferedImage edges = detector.getEdgesImage();
-		return edges;
-	}
-
-	@SuppressWarnings("restriction")
 	public double[] getBandHistogram(Histogram h, int band, int bins, boolean normalize) throws IOException {
 		if (band >= getNumBands()) {
 			System.err.println("no band " + band + ", using band 0");
@@ -114,7 +98,6 @@ public class Processor {
 			}
 		}
 		
-		
 		int[] frequencies = h.getBins(band);
 
 		int bandMax = 1;
@@ -123,10 +106,10 @@ public class Processor {
 		}
 		for (int f = 0; f < frequencies.length; f++) {
 			if (normalize) {
-				frequencies[f] = (int)(255*(float)frequencies[f]/bandGlobalMax);
+				frequencies[f] = (int)((Math.pow(2,bitsPerBin)-1)*(float)frequencies[f]/bandGlobalMax);
 			}
 			else {
-				frequencies[f] = (int)(255*(float)frequencies[f]/bandMax);
+				frequencies[f] = (int)((Math.pow(2,bitsPerBin)-1)*(float)frequencies[f]/bandMax);
 			}
 		}
 
@@ -135,7 +118,73 @@ public class Processor {
 			result[f] = (double) frequencies[f];
 		return result;
 	}
-	private void makeEdgeHistograms(int bins) {
+
+	public Float getLowBand() {
+		return lowBand;
+	}
+	public Float getHighBand() {
+		return highBand;
+	}
+
+	public Integer getNumBands() {
+		return sampleModel.getNumBands();
+	}
+
+	public double[] getTextureHistogram() {
+		return texture;
+	}
+	
+	public double[] getCurvatureHistogram() {
+		return curviness;
+	}
+	
+	public double[] getRedHistogram() {
+		try {
+			return getBandHistogram(histogram, R, bins, normalize);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public double[] getGreenHistogram() {
+		try {
+			return getBandHistogram(histogram, G, bins, normalize);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public double[] getBlueHistogram() {
+		try {
+			return getBandHistogram(histogram, B, bins, normalize);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public BufferedImage getEdgesImage() {
+		CannyEdgeDetector detector = new CannyEdgeDetector();
+		detector.setSourceImage(bufferedImage);
+		detector.setLowThreshold(lowBand); //1.0f
+		detector.setHighThreshold(highBand); //3.0f
+		detector.process();
+		BufferedImage edges = detector.getEdgesImage();
+		return edges;
+	}
+	
+	public void buildIndexes() throws IOException, KeySizeException, KeyDuplicateException {
+		if (sampleModel.getNumBands() > 0)
+			getBandHistogram(histogram, 0, bins, normalize);
+		makeEdgeHistograms();
+	}
+
+	private void makeEdgeHistograms() {
 		if (hasEdgeHistograms == true)
 			return;
 
@@ -223,7 +272,7 @@ public class Processor {
 			textMax = textMax > texture[t] ? textMax : texture[t];
 		}
 		for (int t = 0; t < texture.length; t++) {
-			texture[t] = (int)(255*(float)texture[t]/textMax);
+			texture[t] = (int)((Math.pow(2,bitsPerBin)-1)*(float)texture[t]/textMax);
 		}
 
 		double curvMax = 1;
@@ -231,18 +280,12 @@ public class Processor {
 			curvMax = curvMax > curviness[c] ? curvMax : curviness[c];
 		}
 		for (int c = 0; c < curviness.length; c++) {
-			curviness[c] = (int)(255*(float)curviness[c]/curvMax);
+			curviness[c] = (int)((Math.pow(2,bitsPerBin)-1)*(float)curviness[c]/curvMax);
 		}
 		hasEdgeHistograms = true;
 	}
 
-	@SuppressWarnings("restriction")
-	public void buildIndexes() throws IOException, KeySizeException, KeyDuplicateException {
-		if (sampleModel.getNumBands() > 0)
-			getBandHistogram(histogram, 0,8, normalize);
-		makeEdgeHistograms(8);
-	}
-
+	@SuppressWarnings("unused")
 	public int[] getTopology(int dimensionLength) throws IOException {
 		int[] result = new int[dimensionLength*dimensionLength];
 		for (int i = 0; i < result.length; i++)
@@ -320,37 +363,5 @@ public class Processor {
 		}
 //		System.err.println(hash);
 		return result;
-	}
-
-	
-	@SuppressWarnings("restriction")
-	public Processor(File file, boolean normalize) throws IOException, KeySizeException, KeyDuplicateException {
-		this.file = file;
-		this.normalize = normalize;
-		logger.debug("file="+file);
-		System.err.println(file);
-		bufferedImage = ImageIO.read(file);
-		if (bufferedImage == null)
-			throw new IOException("cannot read file");
-		image = PlanarImage.wrapRenderedImage(bufferedImage);
-		sampleModel = image.getSampleModel();
-		int bandCount = sampleModel.getNumBands();
-		int bits = DataBuffer.getDataTypeSize(sampleModel.getDataType());
-		int[] binz = new int[bandCount];
-		double[] min = new double[bandCount];
-		double[] max = new double[bandCount];
-		int maxxx = 1 << bits;
-
-		for (int i = 0; i < bandCount; i++) {
-			//bins[i] = maxxx;
-			binz[i] = 8;
-			min[i] = 0;
-			max[i] = maxxx;
-		}
-		RenderedOp op = HistogramDescriptor.create(image, null, 1, 1, binz, min, max, null);
-		histogram = (Histogram)op.getProperty("histogram");
-		makeEdgeHistograms(8);
-
-		buildIndexes();
 	}
 }
