@@ -40,8 +40,12 @@ public class ImageProcessor {
 		this.normalize = normalize;
 	}
 	
-	public void setFiles(List<File> files) {
+	public void clearFiles() {
 		files.clear();
+        }
+
+	public void setFiles(List<File> files) {
+		clearFiles();
 		addFiles( files );
 	}
 
