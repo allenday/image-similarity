@@ -95,8 +95,9 @@ public class Processor {
 		}
 		RenderedOp op = HistogramDescriptor.create(image, null, 1, 1, binz, min, max, null);
 		histogram = (Histogram)op.getProperty("histogram");
-		makeEdgeHistograms();
 
+		makeEdgeHistograms();
+		
 		buildIndexes();
 	}
 
