@@ -7,6 +7,7 @@ import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 import javax.media.jai.Histogram;
@@ -43,17 +44,38 @@ public class Processor {
 	private int bins = 0;
 	private int bitsPerBin = 0;
 
-	public Processor(File file, int bins, int bitsPerBin, boolean normalize) throws IOException, KeySizeException, KeyDuplicateException {
+	public Processor(InputStream inputStream, int bins, int bitsPerBin, boolean normalize) throws IOException, KeySizeException, KeyDuplicateException {
 		this.bins = bins;
 		this.bitsPerBin = bitsPerBin;
 		this.normalize = normalize;
 		
+		bufferedImage = ImageIO.read(inputStream);
+		
+		processImage( bufferedImage );
+	}
+	
+	public Processor(File file, int bins, int bitsPerBin, boolean normalize) throws IOException, KeySizeException, KeyDuplicateException {
+		this.bins = bins;
+		this.bitsPerBin = bitsPerBin;
+		this.normalize = normalize;		
+		logger.debug("file="+file);
+		bufferedImage = ImageIO.read(file);
+		processImage( bufferedImage );
+		
+	}
+
+	public Processor(InputStream inputStream, boolean normalize) throws IOException, KeySizeException, KeyDuplicateException {
+		this(inputStream, 8, 8, normalize);
+	}
+
+	public Processor(File file, boolean normalize) throws IOException, KeySizeException, KeyDuplicateException {
+		this(file, 8, 8, normalize);
+	}
+	
+	private void processImage( BufferedImage b ) throws IOException, KeyDuplicateException, KeySizeException {
 		texture = new double[bins];
 		curviness = new double[bins];
-		
-		logger.debug("file="+file);
-		System.err.println(file);
-		bufferedImage = ImageIO.read(file);
+
 		if (bufferedImage == null)
 			throw new IOException("cannot read file");
 		image = PlanarImage.wrapRenderedImage(bufferedImage);
@@ -77,14 +99,10 @@ public class Processor {
 
 		buildIndexes();
 	}
-	
-	public Processor(File file, boolean normalize) throws IOException, KeySizeException, KeyDuplicateException {
-		this(file, 8, 8, normalize);
-	}
 
 	public double[] getBandHistogram(Histogram h, int band, int bins, boolean normalize) throws IOException {
 		if (band >= getNumBands()) {
-			System.err.println("no band " + band + ", using band 0");
+			logger.info("no band " + band + ", using band 0");
 			band = 0;
 		}
 		
@@ -142,7 +160,6 @@ public class Processor {
 		try {
 			return getBandHistogram(histogram, R, bins, normalize);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -152,7 +169,6 @@ public class Processor {
 		try {
 			return getBandHistogram(histogram, G, bins, normalize);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -162,7 +178,6 @@ public class Processor {
 		try {
 			return getBandHistogram(histogram, B, bins, normalize);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
