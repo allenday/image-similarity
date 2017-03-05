@@ -1,7 +1,7 @@
-import java.nio.*;
-import java.net.*;
-import java.util.*;
-import java.lang.*;
+package com.allenday.util;
+import java.nio.ByteBuffer;
+import java.util.Base64;
+import java.util.BitSet;
 
 class Pack
 {   
