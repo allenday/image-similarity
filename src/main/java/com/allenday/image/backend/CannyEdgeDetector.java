@@ -2,6 +2,9 @@ package com.allenday.image.backend;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * <p><em>This software has been released into the public domain.
  * <strong>Please read the notes in this source file for additional information.
@@ -36,6 +39,7 @@ import java.util.Arrays;
 public class CannyEdgeDetector {
 
 	// statics
+	private static final Logger logger = LoggerFactory.getLogger(CannyEdgeDetector.class);
 	
 	private final static float GAUSSIAN_CUT_OFF = 0.005f;
 	private final static float MAGNITUDE_SCALE = 100F;
@@ -253,7 +257,12 @@ public class CannyEdgeDetector {
 		height = sourceImage.getHeight();
 		picsize = width * height;
 		initArrays();
+		try {
 		readLuminance();
+		} catch (IllegalArgumentException e) {
+			logger.error("readLuminance() failed");
+			return;
+		}
 		if (contrastNormalized) normalizeContrast();
 		computeGradients(gaussianKernelRadius, gaussianKernelWidth);
 		int low = Math.round(lowThreshold * MAGNITUDE_SCALE);
