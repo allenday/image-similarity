@@ -18,6 +18,11 @@ import javax.media.jai.operator.HistogramDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.imgscalr.Scalr;
+import org.imgscalr.Scalr.Method;
+
+import com.allenday.image.ImageFeatures;
+
 import edu.wlu.cs.levy.CG.KeyDuplicateException;
 import edu.wlu.cs.levy.CG.KeySizeException;
 
@@ -25,6 +30,14 @@ public class Processor {
 	private static final Logger logger = LoggerFactory.getLogger(Processor.class);
 
 	//	private KDTree[] kdtree = {new KDTree<String>(8), new KDTree<String>(8), new KDTree<String>(8), new KDTree<String>(8), new KDTree<String>(8)}; 
+	
+	public static final int Y  = 0;
+	public static final int Cb = 1;
+	public static final int Cr = 2;
+//	public static final int T  = 3;
+//	public static final int C  = 4;
+	public static final int O  = 5;
+	
 	public static final int R = 0;
 	public static final int G = 1;
 	public static final int B = 2;
@@ -34,6 +47,8 @@ public class Processor {
 	private float highBand = 3.0f;
 	private double[] texture;
 	private double[] curviness;
+	private char[] topologyLabel;
+	private double[] topologyValue;
 	private boolean hasEdgeHistograms = false;
 	private BufferedImage bufferedImage;
 	private SampleModel sampleModel;
@@ -43,6 +58,8 @@ public class Processor {
 	private boolean normalize;
 	private int bins = 0;
 	private int bitsPerBin = 0;
+	//always 4x4
+	private final int blocksPerSide = 4;
 
 	public Processor(InputStream inputStream, int bins, int bitsPerBin, boolean normalize) throws IOException, KeySizeException, KeyDuplicateException {
 		this.bins = bins;
@@ -60,6 +77,7 @@ public class Processor {
 		this.normalize = normalize;		
 		logger.debug("file="+file);
 		bufferedImage = ImageIO.read(file);
+		
 		processImage( bufferedImage );
 		
 	}
@@ -72,13 +90,31 @@ public class Processor {
 		this(file, 8, 8, normalize);
 	}
 	
+	public ImageFeatures getImageFeatures() {
+		ImageFeatures f = new ImageFeatures(".", bins, blocksPerSide);
+		f.setR(getRedHistogram());
+		f.setG(getBlueHistogram());
+		f.setB(getBlueHistogram());
+		f.setT(getTextureHistogram());
+		f.setC(getCurvatureHistogram());
+		//f.setM(getTopologyValues());
+		f.setMlabel(getTopologyLabels());
+		return f;
+	}
+	
 	private void processImage( BufferedImage b ) throws IOException, KeyDuplicateException, KeySizeException {
 		texture = new double[bins];
 		curviness = new double[bins];
+		topologyLabel = new char[blocksPerSide*blocksPerSide];
+		topologyValue = new double[blocksPerSide*blocksPerSide];
 
 		if (bufferedImage == null)
 			throw new IOException("cannot read file");
-		image = PlanarImage.wrapRenderedImage(bufferedImage);
+		
+//		BufferedImage thumbnail = Scalr.resize(bufferedImage, Method.ULTRA_QUALITY, 480, 480);
+		BufferedImage thumbnail = bufferedImage;
+		
+		image = PlanarImage.wrapRenderedImage(thumbnail);		
 		sampleModel = image.getSampleModel();
 		int bandCount = sampleModel.getNumBands();
 		int bits = DataBuffer.getDataTypeSize(sampleModel.getDataType());
@@ -96,9 +132,10 @@ public class Processor {
 		RenderedOp op = HistogramDescriptor.create(image, null, 1, 1, binz, min, max, null);
 		histogram = (Histogram)op.getProperty("histogram");
 
+		if (sampleModel.getNumBands() > 0)
+			getBandHistogram(histogram, 0, bins, normalize);
+		//makeTopologies();
 		makeEdgeHistograms();
-		
-		buildIndexes();
 	}
 
 	public double[] getBandHistogram(Histogram h, int band, int bins, boolean normalize) throws IOException {
@@ -122,6 +159,7 @@ public class Processor {
 		int bandMax = 1;
 		for (int f = 0; f < frequencies.length; f++) {
 			bandMax = bandMax > frequencies[f] ? bandMax : frequencies[f];
+			logger.debug("b="+band+",f="+frequencies[f]);
 		}
 		for (int f = 0; f < frequencies.length; f++) {
 			if (normalize) {
@@ -133,8 +171,10 @@ public class Processor {
 		}
 
 		double[] result = new double[frequencies.length];
-		for (int f = 0; f < frequencies.length; f++)
+		for (int f = 0; f < frequencies.length; f++) {
 			result[f] = (double) frequencies[f];
+			logger.debug(""+result[f]);
+		}
 		return result;
 	}
 
@@ -194,12 +234,84 @@ public class Processor {
 		return edges;
 	}
 	
-	public void buildIndexes() throws IOException, KeySizeException, KeyDuplicateException {
-		if (sampleModel.getNumBands() > 0)
-			getBandHistogram(histogram, 0, bins, normalize);
-		makeEdgeHistograms();
-	}
+	/**
+	 * topology breaks the image into an n*n grid
+	 * calculates the max color per grid in RGB space
+	 * and assigns a letter (RGB) and value (normalized by bins)
+	 * to each cell
+	 */
+	private void makeTopologies() {
+		for (int i = 0; i < topologyValue.length; i++) {
+			topologyLabel[i] = '.';
+			topologyValue[i] = 0;
+		}
+		
+		int maxH = image.getHeight();
+		int maxW  = image.getWidth();
+		
+		int stepH = (int) Math.floor((double) maxH / blocksPerSide);
+		int stepW = (int) Math.floor((double) maxW / blocksPerSide);
+		
+//		BufferedImage img = image.getAsBufferedImage().getScaledInstance(width, height, 0);		
+		
+		String hash = "";
+		
+		int tileNum = 0;
+		for (int y = 0; y < blocksPerSide; y++) {
+			for (int x = 0; x < blocksPerSide; x++) {
+				tileNum++;
+				Rectangle rect = new Rectangle();
+				rect.width = (int) stepW;
+				rect.height = (int) stepH;
+				rect.x = x * stepW;
+				rect.y = y * stepH;
+				Raster raster = image.getData(rect);
+//				BufferedImage img = new BufferedImage(image.getColorModel(), raster.createCompatibleWritableRaster(), true, null);
+//				PlanarImage pimg = PlanarImage.wrapRenderedImage(img);
+				
+				
+				int sumR = 0;
+				int sumG = 0;
+				int sumB = 0;
+				int p = 0;
+				double[] pixel = new double[4];
+				for (int j = x*stepW; j < (x+1)*stepW; j++) {
+					for (int k = y*stepH; k < (y+1)*stepH; k++) {
+						raster.getPixel(j, k, pixel);
+						sumR += pixel[R];
+						sumG += pixel[G];
+						sumB += pixel[B];
+						p++;
+					}
+				}
 
+				Integer cell = 0;
+				Character label = 'm';
+				
+				if (sumR >= sumG && sumR >= sumB) {
+					label = 'r';
+					cell = (int)((sumR/((float)256*p)) * (int)(Math.pow(2,bitsPerBin)-1));
+				}
+				else if (sumG >= sumR && sumG >= sumB) {
+					label = 'g';
+					cell = (int)((sumG/((float)256*p)) * (int)(Math.pow(2,bitsPerBin)-1));
+				}
+				else if (sumB >= sumR && sumB >= sumG) {
+					label = 'b';
+					cell = (int)((sumB/((float)256*p)) * (int)(Math.pow(2,bitsPerBin)-1));
+				}
+				
+				topologyValue[y*blocksPerSide+x] = cell;
+				topologyLabel[y*blocksPerSide+x] = label;
+				
+//				System.err.print(col+cell+" ");								
+			}
+//			System.err.println();
+		}
+//		System.err.println(hash);
+
+	}
+	
 	private void makeEdgeHistograms() {
 		if (hasEdgeHistograms == true)
 			return;
@@ -301,83 +413,10 @@ public class Processor {
 		hasEdgeHistograms = true;
 	}
 
-	@SuppressWarnings("unused")
-	public int[] getTopology(int dimensionLength) throws IOException {
-		int[] result = new int[dimensionLength*dimensionLength];
-		for (int i = 0; i < result.length; i++)
-			result[i] = 0;
-		int maxH = image.getHeight();
-		int maxW  = image.getWidth();
-		
-		int stepH = (int) Math.floor((double) maxH / dimensionLength);
-		int stepW = (int) Math.floor((double) maxW / dimensionLength);
-		
-//		BufferedImage img = image.getAsBufferedImage().getScaledInstance(width, height, 0);		
-		
-		String hash = "";
-		
-		int tileNum = 0;
-		for (int y = 0; y < dimensionLength; y++) {
-			for (int x = 0; x < dimensionLength; x++) {
-				tileNum++;
-				Rectangle rect = new Rectangle();
-				rect.width = (int) stepW;
-				rect.height = (int) stepH;
-				rect.x = x * stepW;
-				rect.y = y * stepH;
-				Raster raster = image.getData(rect);
-//				BufferedImage img = new BufferedImage(image.getColorModel(), raster.createCompatibleWritableRaster(), true, null);
-//				PlanarImage pimg = PlanarImage.wrapRenderedImage(img);
-				
-				
-				int sumR = 0;
-				int sumG = 0;
-				int sumB = 0;
-				int p = 0;
-				double[] pixel = new double[4];
-				for (int j = x*stepW; j < (x+1)*stepW; j++) {
-					for (int k = y*stepH; k < (y+1)*stepH; k++) {
-						raster.getPixel(j, k, pixel);
-						sumR += pixel[R];
-						sumG += pixel[G];
-						sumB += pixel[B];
-						p++;
-					}
-				}
-
-				String col = "";
-				Integer cell = 0;
-				
-				if (sumR >= sumG && sumR >= sumB) {
-					col="R";
-					cell = (int)(float)sumR/(64*p);
-					result[y*dimensionLength+x] = cell;
-					hash += Integer.toHexString(cell) + " ";
-				}
-				else if (sumG >= sumR && sumG >= sumB) {
-					col="G";
-					cell = (int)(float)sumG/(64*p);
-					result[y*dimensionLength+x] = 5+cell;
-					hash += Integer.toHexString(5+cell) + " ";
-				}
-				else if (sumB >= sumR && sumB >= sumG) {
-					col="B";
-					cell = (int)(float)sumB/(64*p);
-					result[y*dimensionLength+x] = 10+cell;
-					hash += Integer.toHexString(10+cell) + " ";
-				}
-				else {
-					col="R";
-					cell = (int)(float)sumR/(64*p);
-					result[y*dimensionLength+x] = cell;
-					hash += Integer.toHexString(cell) + " ";
-				}
-				
-//				System.err.print(col+cell+" ");								
-			}
-//			System.err.println();
-		}
-//		System.err.println(hash);
-		return result;
+	public double[] getTopologyValues() {
+		return topologyValue;
+	}
+	public char[] getTopologyLabels() {
+		return topologyLabel;
 	}
 }
