@@ -10,21 +10,23 @@ public class ImageFeatures {
 	public Vector<Double> T = new Vector<Double>();
 	public Vector<Double> C = new Vector<Double>();
 	public Vector<Double> M = new Vector<Double>();
+	public Vector<Character> ML = new Vector<Character>();
 	public String id = null;
 	
-	public ImageFeatures(String id, int bins) {
+	public ImageFeatures(String id, int bins, int blocksPerSide) {
 		this.id = id;
 		R.setSize(bins);
 		G.setSize(bins);
 		B.setSize(bins);
 		T.setSize(bins);
 		C.setSize(bins);
-		M.setSize(16);
+		M.setSize(blocksPerSide*blocksPerSide);
+		ML.setSize(blocksPerSide*blocksPerSide);
 	}
 
 	public void boundsCheck(int a, int b) {
 		if (a != b)
-			throw new IndexOutOfBoundsException("vector size mismatch");
+			throw new IndexOutOfBoundsException("vector size mismatch: " + a + " != " + b);
 	}
 	
 	public void setR(double[] n) {
@@ -66,6 +68,13 @@ public class ImageFeatures {
 		boundsCheck(n.length, M.size());
 		for (int i = 0; i < n.length; i++) {
 			M.set(i, n[i]);
+		}
+	}
+
+	public void setMlabel(char[] n) {
+		boundsCheck(n.length, ML.size());
+		for (int i = 0; i < n.length; i++) {
+			ML.set(i, n[i]);
 		}
 	}
 
@@ -134,6 +143,20 @@ public class ImageFeatures {
 
 	public String getCcompact() {
 		return getCompact(C,"c");
+	}
+
+	public String getMtokens() {
+		return getTokens(M,"m");
+	}
+
+	public String getMcompact() {
+		String res = "";
+		Vector<Integer> v = d2i(M);
+		for (int i = 0; i < v.size(); i++) {
+			// <m> <block> <label> <value> 
+			res += String.format("%s%X%s ", "m", i, ML.get(i));//, v.get(i) & 0xFFFFF);
+		}
+		return res;
 	}
 
 	// Red.  double[8], 0..255
