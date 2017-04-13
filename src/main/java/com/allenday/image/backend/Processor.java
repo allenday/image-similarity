@@ -18,8 +18,8 @@ import javax.media.jai.operator.HistogramDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.imgscalr.Scalr;
-import org.imgscalr.Scalr.Method;
+//import org.imgscalr.Scalr;
+//import org.imgscalr.Scalr.Method;
 
 import com.allenday.image.ImageFeatures;
 
