@@ -1,111 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.allenday</groupId>
-  <artifactId>image-similarity</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
+	<groupId>com.allenday</groupId>
+	<artifactId>image-similarity</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<packaging>jar</packaging>
 
-  <name>image-similarity</name>
-  <url>http://maven.apache.org</url>
+	<name>image-similarity</name>
+	<url>http://maven.apache.org</url>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 
-  <repositories>
-    <repository>
-      <id>maven-central</id>
-      <url>http://central.maven.org/maven2/</url>
-    </repository>
-    <repository>
-      <id>jboss-3rd-party-releases</id>
-      <url>https://repository.jboss.org/nexus/content/repositories/thirdparty-releases/</url>
-    </repository>
-    <repository>
-      <id>geotoolkit</id>
-      <name>Geotoolkit.org project</name>
-      <url>http://maven.geotoolkit.org</url>
-    </repository>
-      <repository>
-    <id>bintray-jai-imageio</id>
-    <name>jai-imageio at bintray</name>
-    <url>https://dl.bintray.com/jai-imageio/maven/</url>
-    <snapshots>
-      <enabled>false</enabled>
-    </snapshots>
-  </repository>
-    
-        <repository>
-        <id>com.springsource.repository.bundles.external</id>
-        <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
-        <url>http://repository.springsource.com/maven/bundles/external</url>
-    </repository>
-  </repositories>
+	<repositories>
+		<repository>
+			<id>Apache-Releases</id>
+			<url>https://repository.apache.org/content/repositories/releases/</url>
+		</repository>
+		<repository>
+			<id>Alfresco-Public</id>
+			<url>https://artifacts.alfresco.com/nexus/content/repositories/public/</url>
+		</repository>
+		<repository>
+			<id>maven-central</id>
+			<url>http://central.maven.org/maven2/</url>
+		</repository>
+		<repository>
+			<id>jboss-3rd-party-releases</id>
+			<url>https://repository.jboss.org/nexus/content/repositories/thirdparty-releases/</url>
+		</repository>
+		<repository>
+			<id>geotoolkit</id>
+			<name>Geotoolkit.org project</name>
+			<url>http://maven.geotoolkit.org</url>
+		</repository>
+		<repository>
+			<id>bintray-jai-imageio</id>
+			<name>jai-imageio at bintray</name>
+			<url>https://dl.bintray.com/jai-imageio/maven/</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
 
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.8.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.6.4</version>
-    </dependency>
-    <dependency>
-      <groupId>javax.media</groupId>
-      <artifactId>jai_core</artifactId>
-      <version>1.1.3</version>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.media</groupId>
-      <artifactId>jai-codec</artifactId>
-      <version>1.1.3</version>
-    </dependency>
-<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
-<dependency>
-    <groupId>org.apache.commons</groupId>
-    <artifactId>commons-lang3</artifactId>
-    <version>3.0</version>
-</dependency>
-<dependency>
-    <groupId>com.github.jai-imageio</groupId>
-    <artifactId>jai-imageio-core</artifactId>
-    <version>1.3.1</version>
-</dependency>
+		<repository>
+			<id>com.springsource.repository.bundles.external</id>
+			<name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
+			<url>http://repository.springsource.com/maven/bundles/external</url>
+		</repository>
+	</repositories>
 
-    <dependency>
-        <groupId>javax.media.jai</groupId>
-        <artifactId>com.springsource.javax.media.jai.core</artifactId>
-        <version>1.1.3</version>
-    </dependency>
-<dependency>
-    <groupId>org.apache.solr</groupId>
-    <artifactId>solr-solrj</artifactId>
-    <version>6.4.2</version>
-</dependency>
-
-  </dependencies>
-
-  <build>
-  <plugins>
-    <plugin>
-      <artifactId>maven-assembly-plugin</artifactId>
-      <configuration>
-        <archive>
-          <manifest>
-            <mainClass>com.allenday.image.ImageVec</mainClass>
-          </manifest>
-        </archive>
-        <descriptorRefs>
-          <descriptorRef>jar-with-dependencies</descriptorRef>
-        </descriptorRefs>
-      </configuration>
-    </plugin>
-  </plugins>
-  </build>
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.6.4</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.media</groupId>
+			<artifactId>jai_core</artifactId>
+			<version>1.1.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.media</groupId>
+			<artifactId>jai-codec</artifactId>
+			<version>1.1.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.jai-imageio</groupId>
+			<artifactId>jai-imageio-core</artifactId>
+			<version>1.3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.media.jai</groupId>
+			<artifactId>com.springsource.javax.media.jai.core</artifactId>
+			<version>1.1.3</version>
+		</dependency>
+		<!--
+		<dependency>
+			<groupId>org.apache.solr</groupId>
+			<artifactId>solr-common</artifactId>
+			<version>1.3.0</version>
+		</dependency>
+		<dependency><groupId>org.apache.solr</groupId><artifactId>solr</artifactId><version>6.4.2</version></dependency>
+		<dependency>
+			<groupId>org.apache.solr</groupId>
+			<artifactId>solr-core</artifactId>
+			<version>6.4.2</version>
+		</dependency>
+		-->
+		<dependency>
+			<groupId>org.apache.solr</groupId>
+			<artifactId>solr-solrj</artifactId>
+			<version>6.4.2</version>
+		</dependency>
+<!--
+		<dependency>
+			<groupId>org.noggit</groupId>
+			<artifactId>noggit</artifactId>
+			<version>0.6</version>
+		</dependency>
+-->
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>com.allenday.image.ImageVec</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
