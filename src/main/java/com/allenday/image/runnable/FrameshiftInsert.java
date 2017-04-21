@@ -1,10 +1,24 @@
 package com.allenday.image.runnable;
 
+import java.io.IOException;
+
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 
 public class FrameshiftInsert {
-    HttpSolrServer server = new HttpSolrServer("http://localhost:8983/solr");
-
+  public static void main( String[] args ) throws SolrServerException, IOException {
+  	SolrClient solr = new HttpSolrClient.Builder("http://localhost:8983/solr/frameshift").build();    
+    SolrInputDocument document = new SolrInputDocument();
+    document.addField("id", "");
+    document.addField("file_id", "");
+    document.addField("time_offset", "");
+    document.addField("rgbtc", "");
+    UpdateResponse response = solr.add(document);
+     
+     
+    solr.commit();
+  }
 }
