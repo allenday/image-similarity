@@ -21,8 +21,7 @@ public class FrameshiftSearch {
       	SolrClient solr = new HttpSolrClient.Builder("http://localhost:8983/solr/frameshift").build();
 
       	ImageProcessor processor = new ImageProcessor(16,4,false);
-//      	processor.addFile(new File("/Users/allenday/Downloads/gdp_pmv/ph568acd953cf18/"));
-    		processor.addFile(new File("/Users/allenday/Downloads/gdp_pmv/ph568acd953cf18/sec00001.jpg"));
+      	processor.addFile(new File(args[0]));
     		processor.processImages();
         for (Entry<File,ImageFeatures> e : processor.getResults().entrySet()) {
         	File image = e.getKey();
@@ -37,7 +36,7 @@ public class FrameshiftSearch {
 							f.getCcompact() + " " +
 							"";
 
-					System.err.println(qq);
+					System.err.println("query: "+qq);
 					query.setQuery(qq);
 	        query.set("fl", "id,file_id,score");
 
