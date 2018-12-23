@@ -8,7 +8,7 @@ import com.allenday.image.*;
 import edu.wlu.cs.levy.CG.KeyDuplicateException;
 import edu.wlu.cs.levy.CG.KeySizeException;
 
-public class ImageVec {
+public class SingleImageVector {
   public static void main(String[] argv) throws KeySizeException, KeyDuplicateException {
     ImageProcessor processor = new ImageProcessor(16, 4, false);
     processor.addFile(new File(argv[0]));
