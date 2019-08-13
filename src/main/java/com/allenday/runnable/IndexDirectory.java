@@ -29,12 +29,12 @@ class IndexDirectory {
     }
 
     private static void searchIndex() throws IOException, ClassNotFoundException, KeySizeException, CloneNotSupportedException {
-        FileInputStream fis = new FileInputStream(new File("/Volumes/SL-EG5/empornium/Karen-Uehara-MYMN-007.pickle"));
+        FileInputStream fis = new FileInputStream(new File("/Volumes/..."));
         ObjectInputStream ois = new ObjectInputStream(fis);
         ImageIndex index = (ImageIndex) ois.readObject();
 
         ImageProcessor processor = new ImageProcessor(16, 4, false);
-        String pathname = "/Volumes/SL-EG5/empornium/Karen-Uehara-MYMN-007-pmv/";
+        String pathname = "/Volumes/...";
         File path = new File(pathname);
         String[] filenames = path.list();
         Arrays.sort(Objects.requireNonNull(filenames));
@@ -51,7 +51,7 @@ class IndexDirectory {
     }
 
     public static void createIndex() throws KeySizeException, KeyDuplicateException, IOException, CloneNotSupportedException {
-        File path = new File("/Volumes/SL-EG5/empornium/Karen-Uehara-MYMN-007");///13115288");
+        File path = new File("/Volumes/...");
 
         ImageIndexFactory indexFactory = new ImageIndexFactory(bins, bits, normalize);
         indexFactory.addFile(path);
@@ -69,7 +69,7 @@ class IndexDirectory {
             logger.debug("HIT: " + hit.id + ", score=" + hit.score);
         }
 
-        FileOutputStream fos = new FileOutputStream(new File("/Volumes/SL-EG5/empornium/Karen-Uehara-MYMN-007.pickle"));
+        FileOutputStream fos = new FileOutputStream(new File("/Volumes/..."));
         ObjectOutputStream oos = new ObjectOutputStream(fos);
         oos.writeObject(index);
         oos.close();

@@ -22,7 +22,7 @@ class SceneChangeDirectory {
 
     public static void main(String[] argv) {
         ImageProcessor processor = new ImageProcessor(16, 4, false);
-        String pathname = "/Volumes/SL-EG5/empornium/With-Pleasure-2.0/";
+        String pathname = "/Volumes/.../";
         File path = new File(pathname);
         String[] filenames = path.list();
         Arrays.sort(Objects.requireNonNull(filenames));
