@@ -120,7 +120,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.allenday.image.ImageVec</mainClass>
+                            <mainClass>com.allenday.runnable.SingleImageVector</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
