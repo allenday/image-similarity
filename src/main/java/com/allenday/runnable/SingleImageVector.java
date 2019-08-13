@@ -12,8 +12,8 @@ class SingleImageVector {
         int bits = 3; //specifically set to 3 to enable base64 packing
 
         boolean normalize = false;
-        //String imageFile = argv[0];
-        String imageFile = "src/test/resources/image/artists_03.jpeg";
+        String imageFile = argv[0];
+        //String imageFile = "src/test/resources/image/artists_03.jpeg";
         ImageProcessor processor = new ImageProcessor(bins, bits, false);
         ImageFeatures features = processor.extractFeatures(new File(imageFile));
 
