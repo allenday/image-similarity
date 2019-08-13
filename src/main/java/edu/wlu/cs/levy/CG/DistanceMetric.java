@@ -3,6 +3,6 @@
 package edu.wlu.cs.levy.CG;
 
 abstract class DistanceMetric {
-    
-    protected abstract double distance(double [] a, double [] b);
+
+    protected abstract double distance(double[] a, double[] b);
 }

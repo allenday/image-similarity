@@ -3,22 +3,22 @@
 package edu.wlu.cs.levy.CG;
 
 class EuclideanDistance extends DistanceMetric {
-    
-    protected double distance(double [] a, double [] b)  {
-	
-	return Math.sqrt(sqrdist(a, b));
-	
+
+    static double sqrdist(double[] a, double[] b) {
+
+        double dist = 0;
+
+        for (int i = 0; i < a.length; ++i) {
+            double diff = (a[i] - b[i]);
+            dist += diff * diff;
+        }
+
+        return dist;
     }
-    
-    protected static double sqrdist(double [] a, double [] b) {
 
-	double dist = 0;
+    protected double distance(double[] a, double[] b) {
 
-	for (int i=0; i<a.length; ++i) {
-	    double diff = (a[i] - b[i]);
-	    dist += diff*diff;
-	}
+        return Math.sqrt(sqrdist(a, b));
 
-	return dist;
-    }     
+    }
 }

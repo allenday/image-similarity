@@ -1,21 +1,23 @@
 package edu.wlu.cs.levy.CG;
 
+import java.io.Serializable;
 import java.util.List;
 
 // K-D Tree node class
 
-class KDNode<T> {
+class KDNode<T> implements Serializable {
 
 	// these are seen by KDTree
-	protected HPoint k;
+    final HPoint k;
 	T v;
-	protected KDNode<T> left, right;
-	protected boolean deleted;
+	private KDNode<T> left;
+	private KDNode<T> right;
+	boolean deleted;
 
 	// Method ins translated from 352.ins.c of Gonnet & Baeza-Yates
-	protected static <T> int edit(HPoint key, Editor<T> editor, KDNode<T> t, int lev, int K)
+	static <T> int edit(HPoint key, Editor<T> editor, KDNode<T> t, int lev, int K)
 			throws KeyDuplicateException {
-		KDNode<T> next_node = null;
+		KDNode<T> next_node;
 		int next_lev = (lev+1) % K;
 		synchronized (t) {
 			if (key.equals(t.k)) {
@@ -34,30 +36,30 @@ class KDNode<T> {
 				if (next_node == null) {
 					t.right = create(key, editor);
 					return t.right.deleted ? 0 : 1;
-				}                
+				}
 			}
 			else {
 				next_node = t.left;
 				if (next_node == null) {
 					t.left = create(key, editor);
 					return t.left.deleted ? 0 : 1;
-				}                
+				}
 			}
 		}
 
 		return edit(key, editor, next_node, next_lev, K);
 	}
 
-	protected static <T> KDNode<T> create(HPoint key, Editor<T> editor)
+	static <T> KDNode<T> create(HPoint key, Editor<T> editor)
 			throws KeyDuplicateException {
-		KDNode<T> t = new KDNode<T>(key, editor.edit(null));
+		KDNode<T> t = new KDNode<>(key, editor.edit(null));
 		if (t.v == null) {
 			t.deleted = true;
 		}
-		return t;            
+		return t;
 	}
 
-	protected static <T> boolean del(KDNode<T> t) {
+	static <T> boolean del(KDNode<T> t) {
 		synchronized (t) {
 			if (!t.deleted) {
 				t.deleted = true;
@@ -68,7 +70,7 @@ class KDNode<T> {
 	}
 
 	// Method srch translated from 352.srch.c of Gonnet & Baeza-Yates
-	protected static <T> KDNode<T> srch(HPoint key, KDNode<T> t, int K) {
+	static <T> KDNode<T> srch(HPoint key, KDNode<T> t, int K) {
 
 		for (int lev=0; t!=null; lev=(lev+1)%K) {
 
@@ -87,8 +89,8 @@ class KDNode<T> {
 	}
 
 	// Method rsearch translated from 352.range.c of Gonnet & Baeza-Yates
-	protected static <T> void rsearch(HPoint lowk, HPoint uppk, KDNode<T> t, int lev,
-			int K, List<KDNode<T>> v) {
+	static <T> void rsearch(HPoint lowk, HPoint uppk, KDNode<T> t, int lev,
+                            int K, List<KDNode<T>> v) {
 
 		if (t == null) return;
 		if (lowk.coord[lev] <= t.k.coord[lev]) {
@@ -96,7 +98,7 @@ class KDNode<T> {
 		}
 		if (!t.deleted) {
 			int j = 0;
-			while (j<K && lowk.coord[j]<=t.k.coord[j] && 
+			while (j<K && lowk.coord[j]<=t.k.coord[j] &&
 					uppk.coord[j]>=t.k.coord[j]) {
 				j++;
 			}
@@ -110,11 +112,11 @@ class KDNode<T> {
 	// Method Nearest Neighbor from Andrew Moore's thesis. Numbered
 	// comments are direct quotes from there.   NearestNeighborList solution
 	// courtesy of Bjoern Heckel.
-	protected static <T> void nnbr(KDNode<T> kd, HPoint target, HRect hr,
-			double max_dist_sqd, int lev, int K,
-			NearestNeighborList<KDNode<T>> nnl,
-			Checker<T> checker,
-			long timeout) {
+	static <T> void nnbr(KDNode<T> kd, HPoint target, HRect hr,
+                         double max_dist_sqd, int lev, int K,
+                         NearestNeighborList<KDNode<T>> nnl,
+                         Checker<T> checker,
+                         long timeout) throws CloneNotSupportedException {
 
 		// 1. if kd is empty then set dist-sqd to infinity and exit.
 		if (kd == null) {
@@ -134,9 +136,8 @@ class KDNode<T> {
 		// 4. Cut hr into to sub-hyperrectangles left-hr and right-hr.
 		//    The cut plane is through pivot and perpendicular to the s
 		//    dimension.
-		HRect left_hr = hr; // optimize by not cloning
 		HRect right_hr = (HRect) hr.clone();
-		left_hr.max.coord[s] = pivot.coord[s];
+		hr.max.coord[s] = pivot.coord[s];
 		right_hr.min.coord[s] = pivot.coord[s];
 
 		// 5. target-in-left := target_s <= pivot_s
@@ -152,7 +153,7 @@ class KDNode<T> {
 		//    6.2. further-kd := right field of kd and further-hr := right-hr
 		if (target_in_left) {
 			nearer_kd = kd.left;
-			nearer_hr = left_hr;
+			nearer_hr = hr;
 			further_kd = kd.right;
 			further_hr = right_hr;
 		}
@@ -164,7 +165,7 @@ class KDNode<T> {
 			nearer_kd = kd.right;
 			nearer_hr = right_hr;
 			further_kd = kd.left;
-			further_hr = left_hr;
+			further_hr = hr;
 		}
 
 		// 8. Recursively call Nearest Neighbor with paramters
@@ -188,7 +189,7 @@ class KDNode<T> {
 
 		// 10. A nearer point could only lie in further-kd if there were some
 		//     part of further-hr within distance max-dist-sqd of
-		//     target.  
+		//     target.
 		HPoint closest = further_hr.closest(target);
 		if (HPoint.sqrdist(closest, target) < max_dist_sqd) {
 
@@ -196,7 +197,6 @@ class KDNode<T> {
 			if (pivot_to_target < dist_sqd) {
 
 				// 10.1.1 nearest := (pivot, range-elt field of kd)
-				nearest = kd;
 
 				// 10.1.2 dist-sqd = (pivot-target)^2
 				dist_sqd = pivot_to_target;
@@ -234,7 +234,7 @@ class KDNode<T> {
 		deleted = false;
 	}
 
-	protected String toString(int depth) {
+	String toString(int depth) {
 		String s = k + "  " + v + (deleted ? "*" : "");
 		if (left != null) {
 			s = s + "\n" + pad(depth) + "L " + left.toString(depth+1);
@@ -246,11 +246,11 @@ class KDNode<T> {
 	}
 
 	private static String pad(int n) {
-		String s = "";
+		StringBuilder s = new StringBuilder();
 		for (int i=0; i<n; ++i) {
-			s += " ";
+			s.append(" ");
 		}
-		return s;
+		return s.toString();
 	}
 
 	@SuppressWarnings("unused")
@@ -260,8 +260,6 @@ class KDNode<T> {
 	}
 
 	private static void hpcopy(HPoint hp_src, HPoint hp_dst) {
-		for (int i=0; i<hp_dst.coord.length; ++i) {
-			hp_dst.coord[i] = hp_src.coord[i];
-		}
+		System.arraycopy(hp_src.coord, 0, hp_dst.coord, 0, hp_dst.coord.length);
 	}
 }

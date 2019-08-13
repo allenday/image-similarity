@@ -2,49 +2,50 @@
 
 package edu.wlu.cs.levy.CG;
 
-class HPoint {
+import java.io.Serializable;
 
-    protected double [] coord;
+class HPoint implements Serializable {
 
-    protected HPoint(int n) {
-	coord = new double [n];
+    final double[] coord;
+
+    HPoint(int n) {
+        coord = new double[n];
     }
 
-    protected HPoint(double [] x) {
+    HPoint(double[] x) {
 
-	coord = new double[x.length];
-	for (int i=0; i<x.length; ++i) coord[i] = x[i];
+        coord = new double[x.length];
+        System.arraycopy(x, 0, coord, 0, x.length);
     }
 
-    protected Object clone() {
+    static double sqrdist(HPoint x, HPoint y) {
 
-	return new HPoint(coord);
+        return EuclideanDistance.sqrdist(x.coord, y.coord);
     }
 
-    protected boolean equals(HPoint p) {
+    protected Object clone() throws CloneNotSupportedException {
+        Object o = super.clone();
 
-	// seems faster than java.util.Arrays.equals(), which is not 
-	// currently supported by Matlab anyway
-	for (int i=0; i<coord.length; ++i)
-	    if (coord[i] != p.coord[i])
-		return false;
-
-	return true;
+        return new HPoint(coord);
     }
 
-    protected static double sqrdist(HPoint x, HPoint y) {
-	
-	return EuclideanDistance.sqrdist(x.coord, y.coord);
-    }
-    
+    boolean equals(HPoint p) {
 
+        // seems faster than java.util.Arrays.equals(), which is not
+        // currently supported by Matlab anyway
+        for (int i = 0; i < coord.length; ++i)
+            if (coord[i] != p.coord[i])
+                return false;
+
+        return true;
+    }
 
     public String toString() {
-	String s = "";
-	for (int i=0; i<coord.length; ++i) {
-	    s = s + coord[i] + " ";
-	}
-	return s;
+        StringBuilder s = new StringBuilder();
+        for (double v : coord) {
+            s.append(v).append(" ");
+        }
+        return s.toString();
     }
 
 }

@@ -1,8 +1,9 @@
 package edu.wlu.cs.levy.CG;
 
-public class KDException extends Exception {
-    protected KDException(String s) {
+class KDException extends Exception {
+    public static final long serialVersionUID = 1L;
+
+    KDException(String s) {
         super(s);
     }
-    public static final long serialVersionUID = 1L;
 }

@@ -3,16 +3,16 @@
 package edu.wlu.cs.levy.CG;
 
 class HammingDistance extends DistanceMetric {
-    
-    protected double distance(double [] a, double [] b)  {
 
-	double dist = 0;
+    protected double distance(double[] a, double[] b) {
 
-	for (int i=0; i<a.length; ++i) {
-	    double diff = (a[i] - b[i]);
-	    dist += Math.abs(diff);
-	}
+        double dist = 0;
 
-	return dist;
-    }     
+        for (int i = 0; i < a.length; ++i) {
+            double diff = (a[i] - b[i]);
+            dist += Math.abs(diff);
+        }
+
+        return dist;
+    }
 }

@@ -1,195 +1,193 @@
 package com.allenday.image;
 
-import java.util.Vector;
 import org.apache.commons.lang3.StringUtils;
 
-public class ImageFeatures {
-	public Vector<Double> R = new Vector<Double>();
-	public Vector<Double> G = new Vector<Double>();
-	public Vector<Double> B = new Vector<Double>();
-	public Vector<Double> T = new Vector<Double>();
-	public Vector<Double> C = new Vector<Double>();
-	public Vector<Double> M = new Vector<Double>();
-	public Vector<Character> ML = new Vector<Character>();
-	public String id = null;
-	
-	public ImageFeatures(String id, int bins, int blocksPerSide) {
-		this.id = id;
-		R.setSize(bins);
-		G.setSize(bins);
-		B.setSize(bins);
-		T.setSize(bins);
-		C.setSize(bins);
-		M.setSize(blocksPerSide*blocksPerSide);
-		ML.setSize(blocksPerSide*blocksPerSide);
-	}
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
 
-	public void boundsCheck(int a, int b) {
-		if (a != b)
-			throw new IndexOutOfBoundsException("vector size mismatch: " + a + " != " + b);
-	}
-	
-	public void setR(double[] n) {
-		boundsCheck(n.length, R.size());
-		for (int i = 0; i < n.length; i++) {
-			R.set(i, n[i]);
-		}
-	}
-	
-	public void setG(double[] n) {
-		boundsCheck(n.length, G.size());
-		for (int i = 0; i < n.length; i++) {
-			G.set(i, n[i]);
-		}
-	}
+public class ImageFeatures implements Serializable {
+    //TODO enum this
+    public static final Integer DIMENSIONS = 5;
 
-	public void setB(double[] n) {
-		boundsCheck(n.length, B.size());
-		for (int i = 0; i < n.length; i++) {
-			B.set(i, n[i]);
-		}
-	}
+    public static final Integer R = 0;
+    public static final Integer G = 1;
+    public static final Integer B = 2;
+    public static final Integer T = 3;
+    public static final Integer C = 4;
+    public final String id;
+    public Double score = null;
+    private final List<Vector<Double>> vectors = new ArrayList<>();
 
-	public void setT(double[] n) {
-		boundsCheck(n.length, T.size());
-		for (int i = 0; i < n.length; i++) {
-			T.set(i, n[i]);
-		}
-	}
 
-	public void setC(double[] n) {
-		boundsCheck(n.length, C.size());
-		for (int i = 0; i < n.length; i++) {
-			C.set(i, n[i]);
-		}
-	}
+    public ImageFeatures(String id, int bins, int blocksPerSide) {
+        this.id = id;
+        for (Integer d = 0; d < DIMENSIONS; d++) {
+            Vector<Double> v = new Vector<>();
+            v.setSize(bins);
+            vectors.add(v);
+        }
+    }
 
-	public void setM(double[] n) {
-		boundsCheck(n.length, M.size());
-		for (int i = 0; i < n.length; i++) {
-			M.set(i, n[i]);
-		}
-	}
+    public Double getScore() {
+        return score;
+    }
 
-	public void setMlabel(char[] n) {
-		boundsCheck(n.length, ML.size());
-		for (int i = 0; i < n.length; i++) {
-			ML.set(i, n[i]);
-		}
-	}
+    private void boundsCheck(int a, int b) {
+        if (a != b)
+            throw new IndexOutOfBoundsException("vector size mismatch: " + a + " != " + b);
+    }
 
-	private Vector<Integer> d2i(Vector<Double> d) {
-		Vector<Integer> res = new Vector<Integer>();
-		for (int i = 0; i < d.size(); i++)
-			res.add(d.get(i).intValue());
-		return res;
-	}
+    public Vector<Double> getDimension(Integer d) {
+        return vectors.get(d);
+    }
 
-	private String getTokens(Vector<Double> x, String p) {
-		String res = "";
-		Vector<Integer> v = d2i(x);
-		for (int i = 0; i < v.size(); i++) {
-			for (int j = 0; j < v.get(i); j++) {
-				res += String.format("%s%X ", p, i);				
-			}
-		}
-		return res;
-	}
+    public List<Vector<Double>> getDimensions() {
+        List<Vector<Double>> dims = new ArrayList<>();
+        for (int i = 0; i < DIMENSIONS; i++) {
+            dims.add(this.getDimension(i));
+        }
+        return dims;
+    }
 
-	private String getCompact(Vector<Double> x, String p) {
-		String res = "";
-		Vector<Integer> v = d2i(x);
-		for (int i = 0; i < v.size(); i++) {
-			res += String.format("%s%X%X ", p, i, v.get(i) & 0xFFFFF);
-		}
-		return res;
-	}
-	
-	public String getRtokens() {
-		return getTokens(R,"r");
-	}
+    private Vector<Integer> d2i(Vector<Double> d) {
+        Vector<Integer> res = new Vector<>();
+        for (Double aDouble : d) res.add(aDouble.intValue());
+        return res;
+    }
 
-	public String getRcompact() {
-		return getCompact(R,"r");
-	}
+    private String getTokens(Vector<Double> x, String p) {
+        StringBuilder res = new StringBuilder();
+        Vector<Integer> v = d2i(x);
+        for (int i = 0; i < v.size(); i++) {
+            for (int j = 0; j < v.get(i); j++) {
+                res.append(String.format("%s%X ", p, i));
+            }
+        }
+        return res.toString();
+    }
 
-	public String getGtokens() {
-		return getTokens(G,"g");
-	}
+    private String getCompact(Vector<Double> x, String p) {
+        StringBuilder res = new StringBuilder();
+        Vector<Integer> v = d2i(x);
+        for (int i = 0; i < v.size(); i++) {
+            res.append(String.format("%s%X%X ", p, i, v.get(i) & 0xFFFFF));
+        }
+        return res.toString();
+    }
 
-	public String getGcompact() {
-		return getCompact(G,"g");
-	}
+    public String getAllJson() {
+        return "{" +
+                "\"red\":[" + getR() + "]," +
+                "\"green\":[" + getG() + "]," +
+                "\"blue\":[" + getB() + "]," +
+                "\"texture\":[" + getT() + "]," +
+                "\"curvature\":[" + getC() + "]" +
+                "}";
+    }
 
-	public String getBtokens() {
-		return getTokens(B,"b");
-	}
+    public String getAllcompact() {
+        return getRcompact() + getGcompact() + getBcompact() + getTcompact() + getCcompact();
+    }
 
-	public String getBcompact() {
-		return getCompact(B,"b");
-	}
+    public String getRtokens() {
+        return getTokens(vectors.get(R), "r");
+    }
 
-	public String getTtokens() {
-		return getTokens(T,"t");
-	}
+    private String getRcompact() {
+        return getCompact(vectors.get(R), "r");
+    }
 
-	public String getTcompact() {
-		return getCompact(T,"t");
-	}
+    public String getGtokens() {
+        return getTokens(vectors.get(G), "g");
+    }
 
-	public String getCtokens() {
-		return getTokens(C,"c");
-	}
+    private String getGcompact() {
+        return getCompact(vectors.get(G), "g");
+    }
 
-	public String getCcompact() {
-		return getCompact(C,"c");
-	}
+    public String getBtokens() {
+        return getTokens(vectors.get(B), "b");
+    }
 
-	public String getMtokens() {
-		return getTokens(M,"m");
-	}
+    private String getBcompact() {
+        return getCompact(vectors.get(B), "b");
+    }
 
-	public String getMcompact() {
-		String res = "";
-		Vector<Integer> v = d2i(M);
-		for (int i = 0; i < v.size(); i++) {
-			// <m> <block> <label> <value> 
-			res += String.format("%s%X%s ", "m", i, ML.get(i));//, v.get(i) & 0xFFFFF);
-		}
-		return res;
-	}
+    public String getTtokens() {
+        return getTokens(vectors.get(T), "t");
+    }
 
-	// Red.  double[8], 0..255
-	public String getR() {
-		return StringUtils.join(d2i(R), ",");
-	}
-	// Green.  double[8], 0..255
-	public String getG() {
-		return StringUtils.join(d2i(G), ",");
-	}
-	// Blue.  double[8], 0..255
-	public String getB() {
-		return StringUtils.join(d2i(B), ",");
-	}
-	// Texture.  double[8], 0..255
-	public String getT() {
-		return StringUtils.join(d2i(T), ",");
-	}
-	// Curvature.  double[8], 0..255
-	public String getC() {
-		return StringUtils.join(d2i(C), ",");
-	}
-	// Topology.  double[16]
-	public String getM() {
-		return StringUtils.join(d2i(M), ",");
-	}
-/*
-                                        "\t" + r[0] + "," + r[1] + "," + r[2] + "," + r[3] + "," + r[4] + "," + r[5] + "," + r[6] + "," + r[7] +
-                                        "\t" + g[0] + "," + g[1] + "," + g[2] + "," + g[3] + "," + g[4] + "," + g[5] + "," + g[6] + "," + g[7] +
-                                        "\t" + b[0] + "," + b[1] + "," + b[2] + "," + b[3] + "," + b[4] + "," + b[5] + "," + b[6] + "," + b[7] +
-                                        "\t" + t[0] + "," + t[1] + "," + t[2] + "," + t[3] + "," + t[4] + "," + t[5] + "," + t[6] + "," + t[7] +
-                                        "\t" + c[0] + "," + c[1] + "," + c[2] + "," + c[3] + "," + c[4] + "," + c[5] + "," + c[6] + "," + c[7] +
-                                        "\t" + m[0] + "," + m[1] + "," + m[2] + "," + m[3] + "," + m[4] + "," + m[5] + "," + m[6] + "," + m[7] + "," + m[8] + "," + m[9] + "," + m[10] + "," + m[11] + "," + m[12] + "," + m[13] + "," + m[14] + "," + m[15] +
-                                        "";
-*/
+    private String getTcompact() {
+        return getCompact(vectors.get(T), "t");
+    }
+
+    public String getCtokens() {
+        return getTokens(vectors.get(C), "c");
+    }
+
+    private String getCcompact() {
+        return getCompact(vectors.get(C), "c");
+    }
+
+    // Red.  double[8], 0..255
+	private String getR() {
+        return StringUtils.join(d2i(vectors.get(R)), ",");
+    }
+
+    public void setR(double[] n) {
+        boundsCheck(n.length, vectors.get(R).size());
+        for (int i = 0; i < n.length; i++) {
+            vectors.get(R).set(i, n[i]);
+        }
+    }
+
+    // Green.  double[8], 0..255
+	private String getG() {
+        return StringUtils.join(d2i(vectors.get(G)), ",");
+    }
+
+    public void setG(double[] n) {
+        boundsCheck(n.length, vectors.get(G).size());
+        for (int i = 0; i < n.length; i++) {
+            vectors.get(G).set(i, n[i]);
+        }
+    }
+
+    // Blue.  double[8], 0..255
+	private String getB() {
+        return StringUtils.join(d2i(vectors.get(B)), ",");
+    }
+
+    public void setB(double[] n) {
+        boundsCheck(n.length, vectors.get(B).size());
+        for (int i = 0; i < n.length; i++) {
+            vectors.get(B).set(i, n[i]);
+        }
+    }
+
+    // Texture.  double[8], 0..255
+	private String getT() {
+        return StringUtils.join(d2i(vectors.get(T)), ",");
+    }
+
+    public void setT(double[] n) {
+        boundsCheck(n.length, vectors.get(T).size());
+        for (int i = 0; i < n.length; i++) {
+            vectors.get(T).set(i, n[i]);
+        }
+    }
+
+    // Curvature.  double[8], 0..255
+	private String getC() {
+        return StringUtils.join(d2i(vectors.get(C)), ",");
+    }
+
+    public void setC(double[] n) {
+        boundsCheck(n.length, vectors.get(C).size());
+        for (int i = 0; i < n.length; i++) {
+            vectors.get(C).set(i, n[i]);
+        }
+    }
 }
