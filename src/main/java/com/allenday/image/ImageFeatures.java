@@ -166,7 +166,7 @@ public class ImageFeatures implements Serializable {
             res.append(e);
         }
 
-        return res.toString() + sep;
+        return res.toString();
     }
 
 
@@ -192,7 +192,7 @@ public class ImageFeatures implements Serializable {
         return getLabeledHexR() + getLabeledHexG() + getLabeledHexB() + getLabeledHexT() + getLabeledHexC();
     }
     public String getRawB64All() {
-        return getRawB64R() + getRawB64G() + getRawB64B() + getRawB64T() + getRawB64C();
+        return getRawB64R() + "-" + getRawB64G() + "-" + getRawB64B() + "-" + getRawB64T() + "-" + getRawB64C();
     }
 //    public String getLabeledBase64All() {
 //        return getLabeledBase64R() + getLabeledBase64G() + getLabeledBase64B() + getLabeledBase64T() + getLabeledBase64C();
