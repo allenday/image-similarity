@@ -546,7 +546,7 @@ class CannyEdgeDetector {
 
     private void readLuminance() {
         int type = sourceImage.getType();
-        logger.debug("imagetype="+sourceImage.getType());
+        //logger.debug("imagetype="+sourceImage.getType());
 
         if (type == BufferedImage.TYPE_INT_RGB || type == BufferedImage.TYPE_INT_ARGB) {
             logger.debug("RGB");
