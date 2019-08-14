@@ -16,8 +16,8 @@ public class ImageVectors {
         boolean normalize = false;
         ImageProcessor processor = new ImageProcessor(bins, bits, false);
 
-        String input = "src/test/resources/image/";//bad.gif";
-        //String input = argv[0];
+        //String input = "src/test/resources/image/";//bad.gif";
+        String input = argv[0];
 
         List<File> files = new ArrayList<>();
         File f0 = new File(input);
