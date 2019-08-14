@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -20,7 +21,7 @@ class SceneChangeDirectory {
     static int bits = 4;
     static boolean normalize = false;
 
-    public static void main(String[] argv) {
+    public static void main(String[] argv) throws IOException {
         ImageProcessor processor = new ImageProcessor(16, 4, false);
         String pathname = "/Volumes/.../";
         File path = new File(pathname);

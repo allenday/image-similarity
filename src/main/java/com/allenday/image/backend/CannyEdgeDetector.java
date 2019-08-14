@@ -245,6 +245,7 @@ class CannyEdgeDetector {
             readLuminance();
         } catch (IllegalArgumentException e) {
             logger.error("readLuminance() failed");
+            e.printStackTrace();
             return;
         }
         if (contrastNormalized) normalizeContrast();
@@ -545,7 +546,10 @@ class CannyEdgeDetector {
 
     private void readLuminance() {
         int type = sourceImage.getType();
+        logger.debug("imagetype="+sourceImage.getType());
+
         if (type == BufferedImage.TYPE_INT_RGB || type == BufferedImage.TYPE_INT_ARGB) {
+            logger.debug("RGB");
             int[] pixels = (int[]) sourceImage.getData().getDataElements(0, 0, width, height, null);
             for (int i = 0; i < picsize; i++) {
                 int p = pixels[i];
@@ -573,6 +577,17 @@ class CannyEdgeDetector {
                 int r = pixels[offset++] & 0xff;
                 data[i] = luminance(r, g, b);
             }
+//        } else if (type == BufferedImage.TYPE_BYTE_INDEXED) {
+//            byte[] pixels = (byte[]) sourceImage.getData().getDataElements(0, 0, width, height, null);
+//            int offset = 0;
+//            for (int i = 0; i < picsize; i++) {
+//                logger.debug("offset,picsize="+offset+","+picsize);
+//                if (offset+2 >= picsize) break;
+//                int r = pixels[offset++] & 0xff;
+//                int g = pixels[offset++] & 0xff;
+//                int b = pixels[offset++] & 0xff;
+//                data[i] = luminance(r, g, b);
+//            }
         } else {
             throw new IllegalArgumentException("Unsupported image type: " + type);
         }

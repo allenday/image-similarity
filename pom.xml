@@ -135,7 +135,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.allenday.runnable.SingleImageVector</mainClass>
+                            <mainClass>com.allenday.runnable.ImageVectors</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

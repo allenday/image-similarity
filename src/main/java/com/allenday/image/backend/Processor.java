@@ -1,6 +1,8 @@
 package com.allenday.image.backend;
 
+import at.dhyan.open_imaging.GifDecoder;
 import com.allenday.image.ImageFeatures;
+import org.imgscalr.Scalr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +19,7 @@ import java.awt.image.SampleModel;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 
 //import org.imgscalr.Scalr;
 //import org.imgscalr.Scalr.Method;
@@ -52,6 +55,7 @@ public class Processor {
     private final boolean normalize;
     private final int bins;
     private final int bitsPerBin;
+    private File file;
 
     public Processor(InputStream inputStream, int bins, int bitsPerBin, boolean normalize) throws IOException {
         this.bins = bins;
@@ -64,12 +68,26 @@ public class Processor {
     }
 
     public Processor(File file, int bins, int bitsPerBin, boolean normalize) throws IOException {
+        this.file = file;
         this.bins = bins;
         this.bitsPerBin = bitsPerBin;
         this.normalize = normalize;
         //logger.debug("file="+file);
-        bufferedImage = ImageIO.read(file);
+        try {
+        GifDecoder.GifImage gifImage = GifDecoder.read(Files.readAllBytes(file.toPath()));
+            logger.debug("got animated gif!");
+            logger.debug("frames="+gifImage.getFrameCount());
+            logger.debug("delay="+gifImage.getDelay(0));
+            logger.debug("bg="+gifImage.getBackgroundColor());
+            logger.debug("width="+gifImage.getWidth());
+            logger.debug("height="+gifImage.getHeight());
 
+            Integer midPoint = new Double(Math.floor(gifImage.getFrameCount()/2)).intValue();
+            logger.debug("midPoint="+midPoint);
+            bufferedImage = gifImage.getFrame(midPoint);
+        } catch (IOException e) {
+            bufferedImage = ImageIO.read(file);
+        }
         processImage(bufferedImage);
 
     }
@@ -103,6 +121,13 @@ public class Processor {
 
 //		BufferedImage thumbnail = Scalr.resize(bufferedImage, Method.ULTRA_QUALITY, 480, 480);
         BufferedImage thumbnail = bufferedImage;
+        if (thumbnail.getType() == BufferedImage.TYPE_BYTE_INDEXED) {
+//		    thumbnail = Scalr.resize(thumbnail, Scalr.Method.ULTRA_QUALITY, 480, 480);
+
+            //see: https://github.com/DhyanB/Open-Imaging/issues/3
+            //https://github.com/DhyanB/Open-Imaging
+            //https://stackoverflow.com/questions/8933893/convert-each-animated-gif-frame-to-a-separate-bufferedimage
+        }
 
         image = PlanarImage.wrapRenderedImage(thumbnail);
         sampleModel = image.getSampleModel();
@@ -284,7 +309,16 @@ public class Processor {
     private void makeEdgeHistograms() {
         if (hasEdgeHistograms)
             return;
-
+/*
+        if (getEdgesImage() == null) {
+            hasEdgeHistograms = true;
+            for (int i = 0; i < 8; i++) {
+                texture[i] = 0;
+                curviness[i] = 0;
+            }
+            return;
+        }
+*/
         Raster r = getEdgesImage().getData();
         int[] pixels = null;
         int[] SSa = null;

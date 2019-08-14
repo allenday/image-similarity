@@ -37,15 +37,13 @@ public class ImageProcessor {
     }
 
 
-    public ImageFeatures extractFeatures(File file) {
+    public ImageFeatures extractFeatures(File file) throws IOException {
         //disallow non jpg
         //TODO check for extension, not only string occurrence
         if (!file.toString().contains("jpg") && !file.toString().contains("jpeg") && !file.toString().contains("gif")) {
             //readLuminance() failed
             //&& file.toString().indexOf("png") == -1
-
-            logger.debug("skipping file not matching (jpg, jpeg, gif): " + file);
-            return null;
+            throw new IOException("skipping file not matching (jpg, jpeg, gif): " + file);
         }
 
         try {

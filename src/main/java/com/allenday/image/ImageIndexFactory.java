@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 public class ImageIndexFactory {
@@ -19,11 +20,11 @@ public class ImageIndexFactory {
         index = new ImageIndex(bins);
     }
 
-    public ImageIndex createIndex() throws KeySizeException, KeyDuplicateException {
+    public ImageIndex createIndex() throws KeySizeException, KeyDuplicateException, IOException {
         return createIndex(0, 1);
     }
 
-    public ImageIndex createIndex(Integer howMany, Integer stepSize) throws KeySizeException, KeyDuplicateException {
+    public ImageIndex createIndex(Integer howMany, Integer stepSize) throws KeySizeException, KeyDuplicateException, IOException {
         List<File> forRemoval = new ArrayList<>();
         Integer added = 0;
         Integer substep = 0;
