@@ -23,8 +23,8 @@ public class ImageVectors {
         boolean normalize = false;
         ImageProcessor processor = new ImageProcessor(bins, bits, false);
 
-        String input = "/Users/allenday/Downloads/01";//"src/test/resources/image/";//pictures-of-nasa-s-atlantis-shuttle-launch-photos-video.jpeg";//bad.gif";
-        //String input = argv[0];
+        //String input = "/Users/allenday/Downloads/01";//"src/test/resources/image/";//pictures-of-nasa-s-atlantis-shuttle-launch-photos-video.jpeg";//bad.gif";
+        String input = argv[0];
         String frameshiftUrl = "";
         if (argv.length > 1)
             frameshiftUrl = argv[1];
