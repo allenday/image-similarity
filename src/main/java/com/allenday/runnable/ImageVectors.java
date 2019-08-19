@@ -17,18 +17,18 @@ import java.util.List;
 public class ImageVectors {
     public static void main(String[] argv) throws IOException, SolrServerException {
         SolrClient solr = null;
-        int batchSize = 100;
+        int batchSize = 10;
         int bins = 8;
         int bits = 3; //specifically set to 3 to enable base64 packing
         boolean normalize = false;
         ImageProcessor processor = new ImageProcessor(bins, bits, false);
 
-        //String input = "src/test/resources/image/pictures-of-nasa-s-atlantis-shuttle-launch-photos-video.jpeg";//bad.gif";
-        String input = argv[0];
-        String frameshiftUrl = null; //http://localhost:8983/solr/frameshift
+        String input = "/Users/allenday/Downloads/01";//"src/test/resources/image/";//pictures-of-nasa-s-atlantis-shuttle-launch-photos-video.jpeg";//bad.gif";
+        //String input = argv[0];
+        String frameshiftUrl = "";
         if (argv.length > 1)
             frameshiftUrl = argv[1];
-        Boolean loadFrameshift = argv[1].compareTo("1") == 1 ? true : false;
+        Boolean loadFrameshift = true;//frameshiftUrl.compareTo("") == 1 ? true : false;
 
         List<File> files = new ArrayList<>();
         File f0 = new File(input);
@@ -61,6 +61,8 @@ public class ImageVectors {
                     document.addField("time_offset", 0);
                     document.addField("rgbtc", features.getLabeledHexAll());
                     UpdateResponse response = solr.add(document);
+                    //System.err.println(response);
+                    //solr.commit();
                     batchIndex++;
                 }
             } catch (IOException e) {
