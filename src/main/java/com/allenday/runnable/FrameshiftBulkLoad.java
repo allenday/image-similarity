@@ -22,16 +22,18 @@ public class FrameshiftBulkLoad {
 
         Integer batchIndex = 0;
         Integer totalRecords = 0;
+
         while ((record = br.readLine()) != null) {
             System.err.println(totalRecords + " " + record);
             String[] fields = record.split("\t");
-            ImageFeatures x = new ImageFeatures("asdf",8,fields[1]);
+            ImageFeatures x = new ImageFeatures(null,8,fields[1]);
 
             SolrInputDocument document = new SolrInputDocument();
             document.addField("id", fields[0]);
             document.addField("file_id", fields[0]);
             document.addField("time_offset", 0);
             document.addField("rgbtc", x.getLabeledHexAll());
+            document.addField("xception", fields[2]);
             UpdateResponse response = solr.add(document);
             batchIndex++;
             totalRecords++;
