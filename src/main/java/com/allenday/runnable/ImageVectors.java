@@ -3,6 +3,11 @@ package com.allenday.runnable;
 import com.allenday.image.ImageFeatures;
 import com.allenday.image.ImageProcessor;
 import org.apache.commons.io.DirectoryWalker;
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.common.SolrInputDocument;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,14 +15,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ImageVectors {
-    public static void main(String[] argv) {
+    public static void main(String[] argv) throws IOException, SolrServerException {
+        SolrClient solr = null;
+        int batchSize = 100;
         int bins = 8;
         int bits = 3; //specifically set to 3 to enable base64 packing
         boolean normalize = false;
         ImageProcessor processor = new ImageProcessor(bins, bits, false);
 
-        //String input = "src/test/resources/image/";//bad.gif";
+        //String input = "src/test/resources/image/pictures-of-nasa-s-atlantis-shuttle-launch-photos-video.jpeg";//bad.gif";
         String input = argv[0];
+        String frameshiftUrl = null; //http://localhost:8983/solr/frameshift
+        if (argv.length > 1)
+            frameshiftUrl = argv[1];
+        Boolean loadFrameshift = argv[1].compareTo("1") == 1 ? true : false;
 
         List<File> files = new ArrayList<>();
         File f0 = new File(input);
@@ -30,16 +41,41 @@ public class ImageVectors {
             files.add(f0);
         }
 
+        Integer batchIndex = 0;
         for (File file : files) {
             System.err.println(file.getAbsolutePath());
             ImageFeatures features = null;
             try {
                 features = processor.extractFeatures(file);
-                System.out.println(file.getAbsolutePath() + " " + features.getRawB64All());
+                System.out.println(file.getAbsolutePath() + " " + features.getRawB64All() + " " + features.getLabeledHexAll());
+                //ImageFeatures x = new ImageFeatures("asdf",bins,features.getRawB64All());
+                //System.out.println(file.getAbsolutePath() + " " + features.getRawB64All() + " " + x.getLabeledHexAll());
+
+                if (loadFrameshift) {
+                    if (solr == null) {
+                        solr = new HttpSolrClient.Builder(frameshiftUrl).build();
+                    }
+                    SolrInputDocument document = new SolrInputDocument();
+                    document.addField("id", features.id);
+                    document.addField("file_id", features.id);
+                    document.addField("time_offset", 0);
+                    document.addField("rgbtc", features.getLabeledHexAll());
+                    UpdateResponse response = solr.add(document);
+                    batchIndex++;
+                }
             } catch (IOException e) {
                 System.out.println(file.getAbsolutePath());
+            } catch (SolrServerException e) {
+                e.printStackTrace();
+            }
+            if (loadFrameshift && batchIndex >= batchSize) {
+                solr.commit();
+                batchIndex = 0;
             }
         }
+        if (loadFrameshift)
+            solr.commit();
+
         //String imageFile = argv[0];
 
         //System.out.println(features.getJsonAll());
@@ -57,4 +93,5 @@ public class ImageVectors {
 //        System.err.println( imageFile + "\t" + features.getCcompact() );
 //        System.err.println();
 //    }
-    }}
+    }
+}
