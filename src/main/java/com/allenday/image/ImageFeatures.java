@@ -36,6 +36,15 @@ public class ImageFeatures implements Serializable {
         }
     }
 
+    public ImageFeatures(String id, int bins, String encoded) {
+        this.id = id;
+        String[] encodedDimension = encoded.split("-");
+        for (Integer d = 0; d < DIMENSIONS; d++) {
+            Vector<Double> v = decodeFeatures(encodedDimension[d]);
+            vectors.add(v);
+        }
+    }
+
     public Double getScore() {
         return score;
     }
@@ -83,6 +92,89 @@ public class ImageFeatures implements Serializable {
         return res.toString();
     }
 
+    public Vector<Double> decodeFeatures(String encoded) {
+        String[] chars = encoded.split("");
+        Double m = 0d;
+        Double n = 0d;
+        Vector<Double> v = new Vector<>();
+        int k = 0;
+        for (int i = 0; i < chars.length; i++) {
+            v.setSize(k+2);
+
+            if (chars[i].compareTo("A") == 0)      { m=0d; n=0d; }
+            else if (chars[i].compareTo("B") == 0) { m=0d; n=1d; }
+            else if (chars[i].compareTo("C") == 0) { m=0d; n=2d; }
+            else if (chars[i].compareTo("D") == 0) { m=0d; n=3d; }
+            else if (chars[i].compareTo("E") == 0) { m=0d; n=4d; }
+            else if (chars[i].compareTo("F") == 0) { m=0d; n=5d; }
+            else if (chars[i].compareTo("G") == 0) { m=0d; n=6d; }
+            else if (chars[i].compareTo("H") == 0) { m=0d; n=7d; }
+            else if (chars[i].compareTo("I") == 0) { m=1d; n=0d; }
+            else if (chars[i].compareTo("J") == 0) { m=1d; n=1d; }
+            else if (chars[i].compareTo("K") == 0) { m=1d; n=2d; }
+            else if (chars[i].compareTo("L") == 0) { m=1d; n=3d; }
+            else if (chars[i].compareTo("M") == 0) { m=1d; n=4d; }
+            else if (chars[i].compareTo("N") == 0) { m=1d; n=5d; }
+            else if (chars[i].compareTo("O") == 0) { m=1d; n=6d; }
+            else if (chars[i].compareTo("P") == 0) { m=1d; n=7d; }
+            else if (chars[i].compareTo("Q") == 0) { m=2d; n=0d; }
+            else if (chars[i].compareTo("R") == 0) { m=2d; n=1d; }
+            else if (chars[i].compareTo("S") == 0) { m=2d; n=2d; }
+            else if (chars[i].compareTo("T") == 0) { m=2d; n=3d; }
+            else if (chars[i].compareTo("U") == 0) { m=2d; n=4d; }
+            else if (chars[i].compareTo("V") == 0) { m=2d; n=5d; }
+            else if (chars[i].compareTo("W") == 0) { m=2d; n=6d; }
+            else if (chars[i].compareTo("X") == 0) { m=2d; n=7d; }
+            else if (chars[i].compareTo("Y") == 0) { m=3d; n=0d; }
+            else if (chars[i].compareTo("Z") == 0) { m=3d; n=1d; }
+            else if (chars[i].compareTo("a") == 0) { m=3d; n=2d; }
+            else if (chars[i].compareTo("b") == 0) { m=3d; n=3d; }
+            else if (chars[i].compareTo("c") == 0) { m=3d; n=4d; }
+            else if (chars[i].compareTo("d") == 0) { m=3d; n=5d; }
+            else if (chars[i].compareTo("e") == 0) { m=3d; n=6d; }
+            else if (chars[i].compareTo("f") == 0) { m=3d; n=7d; }
+            else if (chars[i].compareTo("g") == 0) { m=4d; n=0d; }
+            else if (chars[i].compareTo("h") == 0) { m=4d; n=1d; }
+            else if (chars[i].compareTo("i") == 0) { m=4d; n=2d; }
+            else if (chars[i].compareTo("j") == 0) { m=4d; n=3d; }
+            else if (chars[i].compareTo("k") == 0) { m=4d; n=4d; }
+            else if (chars[i].compareTo("l") == 0) { m=4d; n=5d; }
+            else if (chars[i].compareTo("m") == 0) { m=4d; n=6d; }
+            else if (chars[i].compareTo("n") == 0) { m=4d; n=7d; }
+            else if (chars[i].compareTo("o") == 0) { m=5d; n=0d; }
+            else if (chars[i].compareTo("p") == 0) { m=5d; n=1d; }
+            else if (chars[i].compareTo("q") == 0) { m=5d; n=2d; }
+            else if (chars[i].compareTo("r") == 0) { m=5d; n=3d; }
+            else if (chars[i].compareTo("s") == 0) { m=5d; n=4d; }
+            else if (chars[i].compareTo("t") == 0) { m=5d; n=5d; }
+            else if (chars[i].compareTo("u") == 0) { m=5d; n=6d; }
+            else if (chars[i].compareTo("v") == 0) { m=5d; n=7d; }
+            else if (chars[i].compareTo("w") == 0) { m=6d; n=0d; }
+            else if (chars[i].compareTo("x") == 0) { m=6d; n=1d; }
+            else if (chars[i].compareTo("y") == 0) { m=6d; n=2d; }
+            else if (chars[i].compareTo("z") == 0) { m=6d; n=3d; }
+            else if (chars[i].compareTo("0") == 0) { m=6d; n=4d; }
+            else if (chars[i].compareTo("1") == 0) { m=6d; n=5d; }
+            else if (chars[i].compareTo("2") == 0) { m=6d; n=6d; }
+            else if (chars[i].compareTo("3") == 0) { m=6d; n=7d; }
+            else if (chars[i].compareTo("4") == 0) { m=7d; n=0d; }
+            else if (chars[i].compareTo("5") == 0) { m=7d; n=1d; }
+            else if (chars[i].compareTo("6") == 0) { m=7d; n=2d; }
+            else if (chars[i].compareTo("7") == 0) { m=7d; n=3d; }
+            else if (chars[i].compareTo("8") == 0) { m=7d; n=4d; }
+            else if (chars[i].compareTo("9") == 0) { m=7d; n=5d; }
+            else if (chars[i].compareTo("+") == 0) { m=7d; n=6d; }
+            else if (chars[i].compareTo("/") == 0) { m=7d; n=7d; }
+
+            //System.err.println("k="+k+","+m);
+            v.set(k,m);
+            k++;
+            //System.err.println("k="+k+","+n);
+            v.set(k,n);
+            k++;
+        }
+        return v;
+    }
 
     private String getLabeledB64(Vector<Double> x, String prefix, String sep) {
         Vector<Integer> v = d2i(x);
@@ -92,6 +184,7 @@ public class ImageFeatures implements Serializable {
         for (int i = 0; i < v.size(); i+= 2) {
             String e = null;
             int j = i+1;
+
             if (v.get(i) == 0 && v.get(j) == 0)      { e = "A"; }
             else if (v.get(i) == 0 && v.get(j) == 1) { e = "B"; }
             else if (v.get(i) == 0 && v.get(j) == 2) { e = "C"; }
