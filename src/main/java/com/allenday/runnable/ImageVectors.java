@@ -28,7 +28,7 @@ public class ImageVectors {
         String frameshiftUrl = "";
         if (argv.length > 1)
             frameshiftUrl = argv[1];
-        Boolean loadFrameshift = true;//frameshiftUrl.compareTo("") == 1 ? true : false;
+        Boolean loadFrameshift = frameshiftUrl.compareTo("") == 1 ? true : false;
 
         List<File> files = new ArrayList<>();
         File f0 = new File(input);
