@@ -65,8 +65,10 @@ public class ImageVectors {
                     //solr.commit();
                     batchIndex++;
                 }
+            } catch (IllegalArgumentException e) {
+                System.out.println("failed to process: " + file.getAbsolutePath());
             } catch (IOException e) {
-                System.out.println(file.getAbsolutePath());
+                System.out.println("failed to process: " + file.getAbsolutePath());
             } catch (SolrServerException e) {
                 e.printStackTrace();
             }
