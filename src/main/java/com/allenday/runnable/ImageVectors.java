@@ -9,6 +9,7 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 
+import java.awt.color.CMMException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -65,11 +66,14 @@ public class ImageVectors {
                     //solr.commit();
                     batchIndex++;
                 }
+            } catch (CMMException e) {
+                System.out.println("CMMException failed to process: " + file.getAbsolutePath());
             } catch (IllegalArgumentException e) {
-                System.out.println("failed to process: " + file.getAbsolutePath());
+                System.out.println("IllegalArgumentException failed to process: " + file.getAbsolutePath());
             } catch (IOException e) {
-                System.out.println("failed to process: " + file.getAbsolutePath());
+                System.out.println("IOException failed to process: " + file.getAbsolutePath());
             } catch (SolrServerException e) {
+                System.out.println("SolrServerException failed to process: " + file.getAbsolutePath());
                 e.printStackTrace();
             }
             if (loadFrameshift && batchIndex >= batchSize) {
