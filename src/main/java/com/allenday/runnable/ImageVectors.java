@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ImageVectors {
-    public static void main(String[] argv) throws IOException, SolrServerException {
+    public static void main(String[] argv) {
         SolrClient solr = null;
         int batchSize = 10;
         int bins = 8;
@@ -73,16 +73,32 @@ public class ImageVectors {
             } catch (IOException e) {
                 System.out.println("IOException failed to process: " + file.getAbsolutePath());
             } catch (SolrServerException e) {
-                System.out.println("SolrServerException failed to process: " + file.getAbsolutePath());
+                System.out.println("SolrServerException [1] failed to process: " + file.getAbsolutePath());
                 e.printStackTrace();
             }
             if (loadFrameshift && batchIndex >= batchSize) {
-                solr.commit();
+                try {
+                    solr.commit();
+                } catch (SolrServerException e) {
+                    System.out.println("SolrServerException [2] failed to process: " + file.getAbsolutePath());
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 batchIndex = 0;
             }
         }
-        if (loadFrameshift)
-            solr.commit();
+        if (loadFrameshift) {
+            try {
+                solr.commit();
+            } catch (SolrServerException e) {
+                System.out.println("SolrServerException [3] failed to process");
+                e.printStackTrace();
+            } catch (IOException e) {
+                System.out.println("IOException [2] failed to process");
+                e.printStackTrace();
+            }
+        }
 
         //String imageFile = argv[0];
 
