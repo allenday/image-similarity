@@ -14,6 +14,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class ImageVectors {
     public static void main(String[] argv) {
@@ -42,8 +44,14 @@ public class ImageVectors {
             files.add(f0);
         }
 
-        Integer batchIndex = 0;
+
+        TreeSet<File> sortedFiles = new TreeSet<>();
         for (File file : files) {
+            sortedFiles.add(file);
+        }
+
+        Integer batchIndex = 0;
+        for (File file : sortedFiles) {
             System.err.println(file.getAbsolutePath());
             ImageFeatures features = null;
             try {
